@@ -110,13 +110,46 @@ For a significant feature:
 1. Inspect and understand existing code.
 2. Clarify the requirement if genuinely necessary.
 3. Explain only relevant new/not-validated concepts.
-4. Implement the smallest coherent version, unless the current step is a learner exercise.
+4. Implement the smallest coherent version, unless the current step is an implementation-reasoning checkpoint or an explicitly requested learner exercise.
 5. Run relevant lint/typecheck/build/tests.
 6. Review the implementation.
 7. Summarize what changed.
 8. Present the learning checkpoint.
 
 Never claim verification succeeded unless commands were actually run. Do not implement several unrelated features at once.
+
+## Proactive progression
+
+After completing and verifying a coherent feature, do not wait for the learner to write "suivant". Proactively select the next smallest coherent roadmap item and announce the transition in a concise progress update.
+
+Proceed with that next item automatically when its scope follows the established conventions and does not require a meaningful product or architecture decision. The learner has explicitly delegated routine roadmap planning once the feature specification is accepted.
+
+Pause only when one of these conditions applies:
+
+- a decision has non-obvious functional, security, API-contract, or architectural consequences;
+- the next step is intentionally an implementation-reasoning checkpoint or a learner-written exercise explicitly requested by the learner;
+- a new concept needs theory confirmation before it should be treated as acquired;
+- progress is blocked by missing information or external state.
+
+When pausing is necessary, ask one concise, concrete question or present a small set of explicit options. Never require a generic "continue" or "suivant" confirmation merely to move through the agreed roadmap.
+
+### Execution gate (mandatory)
+
+When the agent starts an implementation step, it must keep working in the same turn until that step is complete. It must not send a final response containing future-tense promises such as "I will continue", "it remains to", or "I am going to add" while required code, tests, fixes, or verification are still pending.
+
+Before any final response for an implementation step, all of the following must be true:
+
+- every announced code change is implemented;
+- relevant tests have been added or updated;
+- relevant lint, unit tests, and E2E tests have been run;
+- any failure found during the turn has been fixed and rechecked;
+- the next roadmap step has either started automatically or has been paused only for one of the explicit conditions above.
+
+If the agent genuinely cannot complete the step in the current turn, it must state the concrete blocker and stop claiming that work is continuing. Token limits, elapsed time, or a desire to provide an interim update are not valid reasons to end an implementation step.
+
+### Questions do not pause the roadmap
+
+A learner question, acknowledgement, or short discussion about completed work does not pause the active roadmap. Answer it directly, then immediately resume the next required implementation or verification step in the same turn. Only an explicit request to pause, stop, change priority, or make a material decision may interrupt proactive progression.
 
 ## Learning response format
 
@@ -144,6 +177,14 @@ Explanations should, when appropriate, answer: What is it? Why does it exist? Ho
 
 Do not repeat introductory explanations for fully validated concepts.
 
+## Accelerated learning mode
+
+Routine learner-written exercises are replaced by short implementation-reasoning questions grounded in code already present in the project. The agent may ask the learner to predict behavior, identify the responsible NestJS mechanism, explain a trade-off, or describe the consequence of a targeted code change.
+
+A correct answer validates understanding of the implementation for the current learning stage. The agent should keep questions concrete and brief, and should not turn every step into a quiz.
+
+Learner-written code exercises remain available on request and are preferred only when the learner explicitly wants hands-on practice for a notion. They are no longer required to progress through the roadmap.
+
 ## Learning progress
 
 Maintain `docs/learning-progress.md`, created when the first concept is introduced.
@@ -159,14 +200,14 @@ A notion is **never fully validated from explanation alone**.
 Every concept has two independent confirmations:
 
 1. **Theory confirmation**: the learner explicitly states that the notion is understood.
-2. **Practice confirmation**: the learner independently codes a feature/exercise requiring that notion and the agent reviews it successfully.
+2. **Implementation reasoning confirmation**: the learner correctly answers a question about a real implementation or proposed code change.
 
 Possible states:
 
 - `NOT_INTRODUCED`
 - `LEARNING`
 - `THEORY_VALIDATED`
-- `PRACTICE_VALIDATED`
+- `REASONING_VALIDATED`
 - `VALIDATED`
 
 Normal progression:
@@ -175,29 +216,29 @@ Normal progression:
 Concept introduced
   -> learner explicitly confirms understanding
   -> THEORY_VALIDATED
-  -> later coding exercise
-  -> successful code review
-  -> PRACTICE_VALIDATED
+  -> later implementation-reasoning question
+  -> correct answer
+  -> REASONING_VALIDATED
   -> VALIDATED
 ```
 
-The learner controls theory validation. The agent controls practice validation based on demonstrated learner-written code. Neither alone can fully validate a notion.
+The learner controls theory validation. The agent controls implementation-reasoning validation based on a correct answer grounded in the project code. Neither alone can fully validate a notion.
 
-If the learner says "Je valide l'injection de dépendances", only theory becomes validated until a practical exercise is passed.
+If the learner says "Je valide l'injection de dépendances", only theory becomes validated until an implementation-reasoning question is answered correctly.
 
-## Practical validation exercises
+## Implementation reasoning validation
 
-After theory validation, plan a realistic coding exercise. Prefer **delayed validation** rather than immediately repeating what was just shown.
+After theory validation, plan a delayed, realistic implementation-reasoning question rather than immediately repeating what was just shown.
 
-Exercises must require the learner to write code. Final practical validation must not be based solely on multiple-choice questions, definitions, verbal answers, or copying the exact implementation just demonstrated.
+Questions must be grounded in the current codebase and require reasoning about behavior, dependencies, types, security, or framework mechanisms. Definitions and generic multiple-choice questions are insufficient.
 
-Prefer transfer exercises: the learner must apply the concept in a slightly different context and decide some combination of where code belongs, which NestJS mechanism to use, how dependencies are wired, how it integrates with existing code, and which types/abstractions are appropriate.
+Prefer transfer questions: the learner should reason about the concept in a slightly different context and decide some combination of where code belongs, which NestJS mechanism applies, how dependencies are wired, how it integrates with existing code, and which types or abstractions are appropriate.
 
-Example: after learning Dependency Injection through `ArticlesService`, later ask the learner to create and inject a reading-time provider rather than reproducing the same service pattern verbatim.
+Example: after learning Dependency Injection through `ArticlesService`, later ask why a reading-time provider must be declared and exported by a module before another module can inject it.
 
-Before a compound exercise, explicitly identify the 1-3 concepts being tested. Later exercises may test more concepts once the learner is comfortable.
+Before a compound question, explicitly identify the 1-3 concepts being tested. Later questions may test more concepts once the learner is comfortable.
 
-## Assistance levels during validation exercises
+## Assistance levels during implementation reasoning validation
 
 Do not immediately give the solution.
 
@@ -208,11 +249,11 @@ Do not immediately give the solution.
 - **LEVEL 4** — partial pseudocode or small code fragment.
 - **LEVEL 5** — complete solution.
 
-Full practical validation is possible only when the exercise is completed using assistance levels 0, 1 or 2.
+Full implementation-reasoning validation is possible only when the question is answered using assistance levels 0, 1 or 2.
 
-If level 3, 4 or 5 is required, the attempt is useful practice but does not fully validate the notion; schedule another exercise later.
+If level 3, 4 or 5 is required, the attempt is useful but does not fully validate the notion; schedule another question later.
 
-## Reviewing learner exercises
+## Reviewing optional learner exercises
 
 When the learner submits code:
 
@@ -226,15 +267,15 @@ Assess correctness, NestJS conventions, TypeScript usage, separation of responsi
 
 Do not demand production-perfect architecture to validate a fundamental concept.
 
-Explicitly conclude with one of:
+For an optional learner-written exercise, explicitly conclude with one of:
 
 - `PRACTICE VALIDATED`
 - `PRACTICE NOT YET VALIDATED`
 - `PRACTICE VALIDATED WITH RESERVATIONS`
 
-`WITH RESERVATIONS` does not count as full validation and should trigger another smaller exercise later.
+`WITH RESERVATIONS` does not count as full validation and should trigger another smaller exercise or implementation-reasoning question later.
 
-Never validate practice without reviewing code written by the learner.
+Never validate an optional learner-written exercise without reviewing code written by the learner. This does not replace the implementation-reasoning validation used in accelerated learning mode.
 
 ## Learning progress format
 
@@ -247,21 +288,21 @@ Recommended `docs/learning-progress.md` structure:
 
 ### dependency-injection
 Theory: VALIDATED
-Practice: VALIDATED
-Validated with exercise: add-reading-time-provider
+Implementation reasoning: VALIDATED
+Validated with question: explain-reading-time-provider-module-wiring
 
-## Theory validated / practice pending
+## Theory validated / implementation reasoning pending
 
 ### dto
 Theory: VALIDATED
-Practice: PENDING
-Suggested future exercise: create-comment-endpoint
+Implementation reasoning: PENDING
+Suggested future question: explain-create-comment-validation-flow
 
 ## Learning
 
 ### validation-pipe
 Theory: LEARNING
-Practice: NOT_STARTED
+Implementation reasoning: NOT_STARTED
 
 ## Not introduced
 
@@ -270,7 +311,7 @@ Practice: NOT_STARTED
 - exception-filters
 ```
 
-Never mark theory validated without explicit learner confirmation. Never mark practice validated without a successful learner-written coding exercise.
+Never mark theory validated without explicit learner confirmation. Never mark implementation reasoning validated without a correct answer grounded in the project code.
 
 Once both confirmations exist, stop routine introductory explanations and validation prompts for that concept. Advanced variants remain separate notions: e.g. basic `dependency-injection` does not automatically validate `custom-providers`, `injection-tokens`, `provider-scopes` or `dynamic-modules`.
 
@@ -278,13 +319,15 @@ Once both confirmations exist, stop routine introductory explanations and valida
 
 Do not hide important framework behavior. At first relevant use, briefly explain what NestJS or TypeORM is doing underneath at the appropriate abstraction level, without re-teaching SQL.
 
-Occasionally challenge the learner to predict behavior or make an implementation decision, but do not turn every interaction into a quiz. If the learner explicitly asks for a direct answer, provide it unless doing so would invalidate an active practical-validation exercise; in that case, explain that requesting the solution will turn the attempt into practice and require another validation exercise later.
+Occasionally challenge the learner to predict behavior or make an implementation decision, but do not turn every interaction into a quiz. If the learner explicitly asks for a direct answer during an active implementation-reasoning question, provide it and schedule another question later.
 
 Educational explanations belong primarily in responses, not excessive source-code comments. Comments should explain non-obvious decisions, not restate code.
 
 ## Naming and language
 
 Use English for source code, class/variable names, API fields, database identifiers and commit messages. Use French for educational explanations and conversation.
+
+At the first introduction of an acronym in an educational explanation, write its expanded form and a brief contextual definition. Do not assume the learner knows acronyms such as XSS, SSR, CSR, CSRF, JWT, or SEO.
 
 ## Dependencies
 
@@ -304,7 +347,7 @@ Follow approximately this progression unless the learner requests another order:
 4. **Users** — users and article authorship through TypeORM.
 5. **Authentication** — registration/login/current user, password hashing, authentication mechanism, Guards/request context.
 6. **Authorization** — only permitted users can modify/delete resources; ownership and 401 vs 403.
-7. **Comments** — additional resource/relations and an opportunity for learner-written validation exercises.
+7. **Comments** — additional resource/relations and an opportunity for implementation-reasoning validation questions.
 8. **Querying** — pagination/filtering/sorting and appropriate TypeORM usage.
 9. **Testing depth** — strengthen unit/integration/E2E strategy.
 10. **Production concerns** — configuration, logging, health checks, graceful shutdown, rate limiting, CORS/security headers, observability/deployment when useful.

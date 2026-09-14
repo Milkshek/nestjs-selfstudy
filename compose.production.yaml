@@ -1,0 +1,38 @@
+name: blognest-production
+
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.production
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET}
+      BCRYPT_SALT_ROUNDS: ${BCRYPT_SALT_ROUNDS:-12}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:${FRONTEND_PORT:-5173}}
+      LOG_LEVELS: ${LOG_LEVELS:-log,warn,error}
+      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-60000}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-100}
+      REFRESH_TOKEN_TTL_SECONDS: ${REFRESH_TOKEN_TTL_SECONDS:-604800}
+    ports:
+      - "${API_PORT:-3000}:3000"
+    volumes:
+      - production_sqlite_data:/app/data
+      - production_uploads_data:/app/uploads
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.production
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:${API_PORT:-3000}}
+    environment:
+      API_URL: http://api:3000
+    ports:
+      - "${FRONTEND_PORT:-5173}:3000"
+    depends_on:
+      - api
+
+volumes:
+  production_sqlite_data:
+  production_uploads_data:

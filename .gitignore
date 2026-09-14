@@ -1,0 +1,7 @@
+.env
+data/
+test-data/
+dist/
+tsconfig.build.tsbuildinfo
+.idea/
+node_modules/
