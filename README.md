@@ -1,67 +1,41 @@
-AI Learning AGENTS.md
+# BlogNest
 
-A reusable AGENTS.md designed to turn an AI coding assistant into a technical mentor rather than a code generator.
+BlogNest est un projet d'apprentissage construit autour d'une API REST NestJS et d'une interface Next.js.
 
-The goal is simple: use AI to learn a new technology while making sure you actually understand and can apply what you’re learning.
+## Development
 
-How it works
+1. Copy `.env.example` to `.env` and set a unique `JWT_SECRET`.
+2. Run `make start`.
+3. Open `http://localhost:5173` for the frontend and `http://localhost:3000/api` for the development API documentation.
 
-The learning process follows a progressive validation system:
+Useful commands:
 
-1. Learn in context — New concepts are introduced when they naturally appear during the project.
-2. Understand — The AI explains what the concept is, why it exists, and how it applies to the current implementation.
-3. Validate theory — You explicitly confirm when you understand the concept.
-4. Practice later — The AI eventually asks you to implement a different feature requiring the same concept.
-5. Validate practice — Your implementation is reviewed to confirm that you can apply the concept autonomously.
+```sh
+make stop
+make test
+make check-n-test
+make front-e2e
+make migrate
+make seed
+make database-reset-and-seed
+```
 
-A concept is considered fully acquired only after both validations:
+`make database-reset-and-seed` deletes the development SQLite volume before recreating and seeding it.
 
-Theory validated + Practice validated = Concept acquired
+`make front-e2e` runs the Playwright browser suite locally. The first run requires `npx playwright install chromium`.
 
-Once acquired, basic explanations for that concept are no longer repeated.
+## Production containers
 
-Why?
+The production stack uses separate multi-stage images. It keeps the SQLite database and uploaded images in named Docker volumes.
 
-AI coding assistants make it extremely easy to generate working software without necessarily understanding the code being produced.
+```sh
+API_PORT=3001 FRONTEND_PORT=5174 make start-production
+```
 
-This approach deliberately trades some development speed for active learning and long-term understanding.
+Set `JWT_SECRET` to a strong, unique secret before starting it. `NEXT_PUBLIC_API_URL` must be the public API URL visible from the browser; by default it follows `API_PORT`. `CORS_ORIGINS` similarly follows `FRONTEND_PORT`. The frontend container uses the internal API URL automatically.
 
-Instead of:
+Stop the production stack with:
 
-“Build this feature for me.”
-
-The workflow progressively moves toward:
-
-“I understand this concept. Give me something to build with it.”
-
-Example project
-
-The current AGENTS.md uses a small backend project as its learning environment:
-
-Node.js + TypeScript + NestJS + TypeORM + SQLite
-
-The application itself is intentionally simple: a blog API with users, articles, authentication, authorization and other common backend features.
-
-The product is not really the project.
-
-The project is the learning process.
-
-Reusing it
-
-Although the current version targets NestJS/backend development, the methodology is technology-agnostic.
-
-Fork or copy the repository and adapt:
-
-* the technology stack;
-* existing knowledge and prerequisites;
-* learning objectives;
-* project scope;
-* concepts to validate.
-
-The same approach can be adapted to another framework, language or technical domain.
-
-Philosophy
-
-AI should progressively make you less dependent on AI, not more.
-
-Use it to explain, challenge, review and provide feedback — while keeping the actual learning in your hands.
+```sh
+make stop-production
+```
